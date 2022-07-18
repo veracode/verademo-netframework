@@ -24,43 +24,22 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
+      
+      # to setup dotnet 
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: '3.1.x'
+          
+      # catching dependencies to speed up the workflow
+      - uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          # Look to see if there is a cache hit for the corresponding requirements file
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget
+      - name: Install dependencies
+        run: dotnet add package Newtonsoft.Json --version 12.0.1
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
-
-      - name: Setup .NET Core SDK
-        uses: actions/setup-dotnet@v2.1.0
    
-# Authenticates packages to push to GPR
-      - uses: actions/setup-dotnet@v2
-        with:
-          dotnet-version: '3.1.x' # SDK Version to use.
-          source-url: https://nuget.pkg.github.com/<owner>/index.json
-        env:
-          NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-      - run: dotnet build <my project>
-      - name: Create the package
-        run: dotnet pack --configuration Release <my project>
-      - name: Publish the package to GPR
-        run: dotnet nuget push <my project>/bin/Release/*.nupkg
-
-      # Authenticates packages to push to Azure Artifacts
-      - uses: actions/setup-dotnet@v2
-        with:
-          source-url: https://pkgs.dev.azure.com/<your-organization>/_packaging/<your-feed-name>/nuget/v3/index.json
-        env:
-          NUGET_AUTH_TOKEN: ${{secrets.AZURE_DEVOPS_PAT}} # Note, create a secret with this name in Settings
-      - name: Publish the package to Azure Artifacts
-        run: dotnet nuget push <my project>/bin/Release/*.nupkg
-
-      # Authenticates packages to push to nuget.org.
-      # It's only the way to push a package to nuget.org feed for macOS/Linux machines due to API key config store limitations.
-      - uses: actions/setup-dotnet@v2
-        with:
-          dotnet-version: 3.1.x
-      - name: Publish the package to nuget.org
-        run: dotnet nuget push */bin/Release/*.nupkg -k $NUGET_AUTH_TOKEN -s https://api.nuget.org/v3/index.json
-        env:
-          NUGET_AUTH_TOKEN: ${{ secrets.NUGET_TOKEN }}
-

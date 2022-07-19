@@ -30,7 +30,5 @@ jobs:
         with:
           dotnet-version: ${{ env.DotnetVersion }}
 
-      - name: Package files
-        run: zip -r app.zip bin
-
+      
    

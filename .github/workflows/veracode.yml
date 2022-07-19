@@ -25,11 +25,11 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
       
-      - uses: actions/setup-dotnet@v1
+      - name: Setup .NET Core SDK
+        uses: actions/setup-dotnet@v1
         with:
           dotnet-version: ${{ env.DotnetVersion }}
-      - name: .NET build
-        run: dotnet publish -p:PublishReadyToRun=false ${{ env.ProjectPath }} --configuration Debug --output bin
+
       - name: Package files
         run: zip -r app.zip bin
 

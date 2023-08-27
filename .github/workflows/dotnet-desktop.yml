@@ -1,0 +1,66 @@
+name: Veracode Build Java Maven Application
+
+on:
+  workflow_call:
+    inputs:
+      repository:
+        required: true
+        type: string
+      ref:
+        required: true
+        type: string
+      token:
+        required: true
+        type: string
+jobs:
+  build:
+    runs-on: windows-2019
+ 
+    steps:
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.1
+      - uses: actions/checkout@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+      - name: Restore dependencies
+        run: nuget restore Verademo-dotnet.sln
+      - name: Clean Default Build
+        run: 'msbuild Verademo-dotnet.sln /t:clean'
+      - name: Build - was dotnet build --no-restore
+        run: >-
+          msbuild.exe Verademo-dotnet.sln /p:DeployOnBuild=true
+          /p:WebPublishMethod=Package /p:PackageAsSingleFile=true
+          /p:SkipInvalidConfigurations=true /p:PackageLocation=./..
+          /p:DebugSymbols=true /t:build
+      - name: List files in the repository and copy artifact
+        run: |
+          dir ${{ github.workspace }}
+          mkdir -p ${{ github.workspace }}/artifact
+          copy Verademo-dotnet.zip ${{ github.workspace }}/artifact
+          dir ${{ github.workspace }}/artifact
+          
+       # Upload the artifact of the zip archive
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3.1.0
+        with:
+          name: VerademoZip
+          path: "./Verademo-dotnet.zip" 
+
+    
+  Security:
+    needs: build
+    name: Veracode Upload and Scan
+    runs-on: ubuntu-latest
+    
+    steps: 
+      - name: Check out main
+        uses: actions/checkout@v2
+        with:
+          path: '${{ github.workspace }}/artifact'
+          
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v3.0.0
+        with:
+          name: VerademoZip
+          path: "./verademo.zip"
+          

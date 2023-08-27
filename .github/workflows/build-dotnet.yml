@@ -1,5 +1,5 @@
 name: Veracode Build Java Maven Application
-
+  
 on:
   workflow_call:
     inputs:
@@ -12,6 +12,8 @@ on:
       token:
         required: true
         type: string
+      push: 
+        
 jobs:
   build:
     runs-on: windows-2019

@@ -14,7 +14,7 @@ on:
         type: string
 jobs:
   build:
-    runs-on: windows-2019
+    runs-on: windows-latest
  
     steps:
       - name: Add msbuild to PATH
@@ -28,9 +28,9 @@ jobs:
         run: 'msbuild Verademo-dotnet.sln /t:clean'
       - name: Build - was dotnet build --no-restore
         run: >-
-          msbuild.exe Verademo-dotnet.sln /p:DeployOnBuild=true
+          msbuild.exe ${{ input.repository }} .sln /p:DeployOnBuild=true
           /p:WebPublishMethod=Package /p:PackageAsSingleFile=true
-          /p:SkipInvalidConfigurations=true /p:PackageLocation=./..
+          /p:SkipInvalidConfigurations=true /p:PackageLocation=../${{ input.repository }}.zip 
           /p:DebugSymbols=true /t:build
       - name: List files in the repository and copy artifact
         run: |
@@ -43,8 +43,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v3.1.0
         with:
-          name: VerademoZip
-          path: "./Verademo-dotnet.zip" 
+          name: ${{ input.repository }}
+          path: "${{ input.repository }}.zip" 
 
     
   Security:
@@ -61,6 +61,6 @@ jobs:
       - name: Download Build Artifact
         uses: actions/download-artifact@v3.0.0
         with:
-          name: VerademoZip
-          path: "./verademo.zip"
+          name: ${{ input.repository }}
+          path: "./${{ input.repository }}.zip"
           

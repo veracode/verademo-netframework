@@ -15,4 +15,4 @@ Check the results.json into source code and reference it in the command to break
 
 To break on new flaws found from previous scan, add "- bf results.json" to string and remove "|| true" at the end of the string so the step will break the build process on new flaws.
 
-Find further options here:https://help.veracode.com/r/r_pipeline_scan_commands
+For more options, see the [Veracode Documentation](https://help.veracode.com/r/r_pipeline_scan_commands).
